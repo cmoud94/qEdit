@@ -17,12 +17,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::init_menu_bar()
 {
-    menu_bar = new QMenuBar(0);
+    menu_bar = new QMenuBar(this);
 
-    menu_file = menu_bar->addMenu(QString("&File"));
-    menu_edit = menu_bar->addMenu(QString("&Edit"));
-    menu_search = menu_bar->addMenu(QString("&Search"));
-    menu_help = menu_bar->addMenu(QString("&Help"));
+    menu_file = new QMenu(tr("&File"), menu_bar);
+    menu_file->addAction(tr("&Quit"), this, SLOT(close()), QKeySequence(tr("Ctrl+Q")));
+    menu_bar->addMenu(menu_file);
 
     setMenuBar(menu_bar);
 }

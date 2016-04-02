@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMenu>
+#include <QKeySequence>
 
 class MainWindow : public QMainWindow
 {
