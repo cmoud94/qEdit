@@ -15,9 +15,11 @@ CONFIG += c++11
 
 
 SOURCES += src/main.cpp\
-        src/mainwindow.cpp
+        src/mainwindow.cpp \
+    src/editor.cpp
 
-HEADERS  += src/mainwindow.h
+HEADERS  += src/mainwindow.h \
+    src/editor.h
 
 RESOURCES += \
     resources.qrc

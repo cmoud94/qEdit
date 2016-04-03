@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>icons/document-new-7.png</file>
+        <file>icons/qEdit_icon.png</file>
     </qresource>
     <qresource prefix="/24x24">
         <file>icons/24x24/document-new-8.png</file>
