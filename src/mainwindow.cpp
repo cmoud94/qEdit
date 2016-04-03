@@ -2,6 +2,8 @@
 
 MainWindow::MainWindow(QMainWindow *parent) : QMainWindow(parent)
 {
+    editors = new QList<Editor*>();
+
     // Window config
     window_title = "qEdit";
     setWindowTitle(window_title);
@@ -20,6 +22,7 @@ MainWindow::MainWindow(QMainWindow *parent) : QMainWindow(parent)
 MainWindow::~MainWindow()
 {
     delete tool_bar_icons;
+    delete editors;
 }
 
 void MainWindow::init_menu_bar()
@@ -157,16 +160,6 @@ void MainWindow::init_tabs()
     tab_widget->setTabsClosable(true);
     //tab_widget->setMovable(true);
 
-    QToolButton *btn = new QToolButton(tab_widget);
-    btn->setText(tr("Testing..."));
-    btn->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    tab_widget->addTab(btn, tr("Test..."));
-
-    QToolButton *btn2 = new QToolButton(tab_widget);
-    btn2->setText(tr("Testing 2..."));
-    btn2->setToolButtonStyle(Qt::ToolButtonTextOnly);
-    tab_widget->addTab(btn2, tr("Test 2..."));
-
     connect(tab_widget, SIGNAL(tabCloseRequested(int)), this, SLOT(tab_close(int)));
 }
 
@@ -175,21 +168,65 @@ void MainWindow::init_status_bar()
 
 }
 
-void MainWindow::tab_new(QString title)
+void MainWindow::tab_new(QString path, QString name, QString content)
 {
-    Editor *editor = new Editor(tab_widget, title);
-    tab_widget->addTab(editor->get_text_edit(), title);
+    printf("__FUNCTION__ = %s\n", __FUNCTION__);
+
+    Editor *editor = new Editor(tab_widget, path, name, content);
+    editors->append(editor);
+
+    printf("\tEditors [");
+    for(int i = 0; i < editors->size(); i++) {
+        printf("%s%s", editors->at(i)->get_document_name().toLatin1().data(), (i + 1 == editors->size()) ? "" : ", ");
+    }
+    printf("]\n");
+
+    tab_widget->addTab(editor->get_text_edit(), name);
     tab_widget->setCurrentIndex(tab_widget->count() - 1);
+    editor->get_text_edit()->setFocus();
 }
 
 void MainWindow::new_file()
 {
     printf("__FUNCTION__ = %s\n", __FUNCTION__);
+
+    tab_new("", "Document", "");
 }
 
 void MainWindow::open_file()
 {
     printf("__FUNCTION__ = %s\n", __FUNCTION__);
+
+    QString path = QDir::homePath() + "/Desktop";
+    QString file_path = QFileDialog::getOpenFileName(this, tr("Open file"), path);
+
+    if(file_path == "") {
+        printf("\tNo file was selected or 'Cancel' pressed.\n");
+        return;
+    }
+
+    QStringList path_strips = file_path.split("/");
+    QString file_name = path_strips.at(path_strips.size() - 1);
+    QFile file(file_path);
+    QString content = "";
+
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        printf("\tIOError while reading file [%s]\n", file_path.toLatin1().data());
+        return;
+    }
+
+    while(!file.atEnd()) {
+        QString line = file.readLine();
+        content += line;
+    }
+
+    file.close();
+
+    printf("\tfile_path = %s\n", file_path.toLatin1().data());
+    printf("\tfile_name = %s\n", file_name.toLatin1().data());
+    //printf("\tcontent = %s\n", content.toLatin1().data());
+
+    tab_new(file_path, file_name, content);
 }
 
 void MainWindow::save_file()
@@ -260,6 +297,24 @@ void MainWindow::about()
 
 void MainWindow::tab_close(int index)
 {
-    QString tab_text = tab_widget->tabText(index);
+    printf("__FUNCTION__ = %s\n", __FUNCTION__);
+
+    tab_widget->setCurrentIndex(index);
+
+    Editor *editor = editors->at(index);
+    QString name = editor->get_document_name();
+    bool modified = editor->get_text_edit()->document()->isModified();
+
+    printf("\tIs '%s' modified? [%s]\n", name.toLatin1().data(), modified ? "true" : "false");
+
+    editors->removeAt(index);
     tab_widget->removeTab(index);
+
+    printf("\tEditors [");
+    for(int i = 0; i < editors->size(); i++) {
+        printf("%s%s", editors->at(i)->get_document_name().toLatin1().data(), (i + 1 == editors->size()) ? "" : ", ");
+    }
+    printf("]\n");
+
+    delete editor;
 }

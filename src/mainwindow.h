@@ -3,15 +3,17 @@
 
 #include <QWidget>
 #include <QMainWindow>
-#include <QKeySequence>
-#include <QIcon>
-#include <QList>
 #include <QMenuBar>
 #include <QMenu>
 #include <QToolBar>
 #include <QToolButton>
 #include <QTabWidget>
 #include <QStatusBar>
+#include <QKeySequence>
+#include <QIcon>
+#include <QList>
+#include <QFileDialog>
+#include <QFile>
 
 #include "editor.h"
 
@@ -27,7 +29,7 @@ private:
     void init_tool_bar();
     void init_tabs();
     void init_status_bar();
-    void tab_new(QString title);
+    void tab_new(QString path, QString name, QString content);
 
     QString window_title;
 
@@ -41,6 +43,7 @@ private:
     QList<QIcon> *tool_bar_icons;
 
     QTabWidget *tab_widget;
+    QList<Editor*> *editors;
 
     QStatusBar *status_bar;
 
