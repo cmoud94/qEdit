@@ -3,9 +3,16 @@
 
 #include <QtWidgets/QWidget>
 #include <QMainWindow>
+#include <QKeySequence>
+#include <QIcon>
+#include <QList>
 #include <QMenuBar>
 #include <QMenu>
-#include <QKeySequence>
+#include <QToolBar>
+#include <QToolButton>
+#include <QTabWidget>
+#include <QTextEdit>
+#include <QStatusBar>
 
 class MainWindow : public QMainWindow
 {
@@ -16,6 +23,8 @@ public:
 
 private:
     void init_menu_bar();
+    void init_tool_bar();
+    void init_tabs();
 
     QString window_title;
 
@@ -24,6 +33,13 @@ private:
     QMenu *menu_edit;
     QMenu *menu_search;
     QMenu *menu_help;
+
+    QToolBar *tool_bar;
+    QList<QIcon> *tool_bar_icons;
+
+    QTabWidget *tab_widget;
+
+    QStatusBar *status_bar;
 };
 
 #endif // MAINWINDOW_H

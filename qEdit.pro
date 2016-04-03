@@ -19,3 +19,6 @@ SOURCES += src/main.cpp\
 
 HEADERS  += src/mainwindow.h
 
+RESOURCES += \
+    resources.qrc
+
