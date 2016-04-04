@@ -29,9 +29,11 @@ private:
     void init_tool_bar();
     void init_tabs();
     void init_status_bar();
+    QString load_supported_file_types();
     void tab_new(QString path, QString name, QString content);
 
     QString window_title;
+    QString supported_file_types;
 
     QMenuBar *menu_bar;
     QMenu *menu_file;

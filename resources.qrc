@@ -15,4 +15,8 @@
         <file>icons/24x24/edit-redo-5.png</file>
         <file>icons/24x24/edit-undo-5.png</file>
     </qresource>
+    <qresource prefix="/files">
+        <file>files/help.txt</file>
+        <file>files/supported_file_extensions.txt</file>
+    </qresource>
 </RCC>

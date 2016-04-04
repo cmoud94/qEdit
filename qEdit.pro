@@ -24,3 +24,5 @@ HEADERS  += src/mainwindow.h \
 RESOURCES += \
     resources.qrc
 
+DISTFILES +=
+

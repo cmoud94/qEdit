@@ -16,6 +16,8 @@ MainWindow::MainWindow(QMainWindow *parent) : QMainWindow(parent)
     init_tabs();
     init_status_bar();
 
+    supported_file_types = load_supported_file_types();
+
     setCentralWidget(tab_widget);
 }
 
@@ -168,6 +170,35 @@ void MainWindow::init_status_bar()
 
 }
 
+QString MainWindow::load_supported_file_types()
+{
+    QFile file(tr(":/files/files/supported_file_extensions.txt"));
+    QString content = "";
+
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        printf("\tCan't open supported file types file.\n");
+        return "";
+    }
+
+    while(!file.atEnd()) {
+        QString line = file.readLine();
+        content += line;
+    }
+
+    file.close();
+
+    QString ret = "";
+    QStringList lines = content.split('\n');
+    for(int i = 0; i < lines.size(); i++) {
+        QStringList line_data = lines.at(i).split('=');
+        if(line_data.size() == 2) {
+            ret += line_data.at(0) + " (*." + line_data.at(1) + ");;";
+        }
+    }
+
+    return ret;
+}
+
 void MainWindow::tab_new(QString path, QString name, QString content)
 {
     printf("__FUNCTION__ = %s\n", __FUNCTION__);
@@ -198,7 +229,8 @@ void MainWindow::open_file()
     printf("__FUNCTION__ = %s\n", __FUNCTION__);
 
     QString path = QDir::homePath() + "/Desktop";
-    QString file_path = QFileDialog::getOpenFileName(this, tr("Open file"), path);
+    QString active_filter = supported_file_types.split(";;").at(0);
+    QString file_path = QFileDialog::getOpenFileName(this, tr("Open file"), path, supported_file_types, &active_filter);
 
     if(file_path == "") {
         printf("\tNo file was selected or 'Cancel' pressed.\n");
