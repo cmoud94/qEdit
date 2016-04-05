@@ -14,8 +14,10 @@
 #include <QList>
 #include <QFileDialog>
 #include <QFile>
+#include <QShortcut>
 
 class Editor;
+enum class document_status_t;
 
 class MainWindow : public QMainWindow
 {
@@ -23,6 +25,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QMainWindow *parent = 0);
     ~MainWindow();
+    QTabWidget *get_tab_widget();
     void update_title(QString str = "");
 
 private:
@@ -31,7 +34,7 @@ private:
     void init_tabs();
     void init_status_bar();
     QString load_supported_file_types();
-    void tab_new(QString path, QString name, QString content);
+    void tab_new(QString path, QString name, QString content, document_status_t status);
 
     QString window_title;
     QString supported_file_types;
@@ -76,6 +79,8 @@ private slots:
 
     // Other slots
     void tab_close(int index);
+    void tab_close_shortcut();
+    void print_debug_info();
 };
 
 #endif // MAINWINDOW_H
