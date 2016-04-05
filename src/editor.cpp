@@ -1,6 +1,8 @@
 #include "editor.h"
 
-Editor::Editor(QWidget *parent, QString path, QString name, QString content) : QWidget(parent)
+#include "mainwindow.h"
+
+Editor::Editor(MainWindow *parent, QString path, QString name, QString content) : QWidget(parent)
 {
     this->parent = parent;
     document_path = path;
@@ -8,6 +10,7 @@ Editor::Editor(QWidget *parent, QString path, QString name, QString content) : Q
     text_edit = new QPlainTextEdit(parent);
     text_edit->insertPlainText(content);
     text_edit->moveCursor(QTextCursor::Start);
+    parent->update_title(document_name);
 }
 
 Editor::~Editor()

@@ -4,11 +4,13 @@
 #include <QWidget>
 #include <QPlainTextEdit>
 
+class MainWindow;
+
 class Editor : public QWidget
 {
     Q_OBJECT
 public:
-    Editor(QWidget *parent, QString path, QString name, QString content);
+    Editor(MainWindow *parent, QString path, QString name, QString content);
     ~Editor();
     QPlainTextEdit *get_text_edit();
     QString get_document_name();
@@ -18,7 +20,7 @@ private:
     QString document_name;
     QString document_path;
 
-    QWidget *parent;
+    MainWindow *parent;
     QPlainTextEdit *text_edit;
 };
 

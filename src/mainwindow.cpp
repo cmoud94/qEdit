@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include "editor.h"
+
 MainWindow::MainWindow(QMainWindow *parent) : QMainWindow(parent)
 {
     editors = new QList<Editor*>();
@@ -25,6 +27,20 @@ MainWindow::~MainWindow()
 {
     delete tool_bar_icons;
     delete editors;
+}
+
+void MainWindow::update_title(QString str)
+{
+    if(str == "") {
+        if(tab_widget->currentIndex() != -1) {
+            QString title = editors->at(tab_widget->currentIndex())->get_document_name();
+            setWindowTitle(window_title + " - " + title);
+        } else {
+            setWindowTitle(window_title);
+        }
+    } else {
+        setWindowTitle(window_title + " - " + str);
+    }
 }
 
 void MainWindow::init_menu_bar()
@@ -203,7 +219,7 @@ void MainWindow::tab_new(QString path, QString name, QString content)
 {
     printf("__FUNCTION__ = %s\n", __FUNCTION__);
 
-    Editor *editor = new Editor(tab_widget, path, name, content);
+    Editor *editor = new Editor(this, path, name, content);
     editors->append(editor);
 
     printf("\tEditors [");
@@ -349,4 +365,5 @@ void MainWindow::tab_close(int index)
     printf("]\n");
 
     delete editor;
+    update_title();
 }

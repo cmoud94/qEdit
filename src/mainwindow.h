@@ -15,7 +15,7 @@
 #include <QFileDialog>
 #include <QFile>
 
-#include "editor.h"
+class Editor;
 
 class MainWindow : public QMainWindow
 {
@@ -23,6 +23,7 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QMainWindow *parent = 0);
     ~MainWindow();
+    void update_title(QString str = "");
 
 private:
     void init_menu_bar();
