@@ -1,4 +1,5 @@
 # qEdit
-User Interfacescourse project in Qt and C++.
+User Interfaces course project in Qt and C++.
 
-[License](LICENSE)
+# License
+qEdit is licensed under GNU GPL v3 [License](LICENSE)
