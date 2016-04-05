@@ -6,7 +6,6 @@ MainWindow::MainWindow(QMainWindow *parent) : QMainWindow(parent)
 {
     editors = new QList<Editor*>();
 
-    // Window config
     window_title = "qEdit";
     setWindowTitle(window_title);
     setMinimumSize(500, 300);
