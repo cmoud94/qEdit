@@ -15,6 +15,7 @@
 #include <QFileDialog>
 #include <QFile>
 #include <QShortcut>
+#include <QMessageBox>
 
 class Editor;
 enum class document_status_t;
@@ -25,8 +26,10 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QMainWindow *parent = 0);
     ~MainWindow();
-    QTabWidget *get_tab_widget();
+
     void update_title(QString str = "");
+
+    QTabWidget *get_tab_widget();
 
 private:
     void init_menu_bar();

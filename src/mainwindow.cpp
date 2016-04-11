@@ -32,16 +32,11 @@ MainWindow::~MainWindow()
     delete editors;
 }
 
-QTabWidget *MainWindow::get_tab_widget()
-{
-    return tab_widget;
-}
-
 void MainWindow::update_title(QString str)
 {
-    if(str == "") {
+    if(str == 0) {
         if(tab_widget->currentIndex() != -1) {
-            QString title = editors->at(tab_widget->currentIndex())->get_document_name();
+            QString title = editors->at(tab_widget->currentIndex())->document_name();
             setWindowTitle(window_title + " - " + title);
         } else {
             setWindowTitle(window_title);
@@ -49,6 +44,11 @@ void MainWindow::update_title(QString str)
     } else {
         setWindowTitle(window_title + " - " + str);
     }
+}
+
+QTabWidget *MainWindow::get_tab_widget()
+{
+    return tab_widget;
 }
 
 void MainWindow::init_menu_bar()
@@ -240,15 +240,8 @@ void MainWindow::tab_new(QString path, QString name, QString content, document_s
     Editor *editor = new Editor(this, path, name, content, status);
     editors->append(editor);
 
-    printf("\tEditors [");
-    for(int i = 0; i < editors->size(); i++) {
-        printf("%s%s", editors->at(i)->get_document_name().toLatin1().data(), (i + 1 == editors->size()) ? "" : ", ");
-    }
-    printf("]\n");
-
-    tab_widget->addTab(editor->get_text_edit(), name);
-    tab_widget->setCurrentIndex(tab_widget->count() - 1);
-    editor->get_text_edit()->setFocus();
+    tab_widget->setCurrentIndex(tab_widget->addTab(editor->container(), name));
+    editor->text_edit()->setFocus();
 }
 
 void MainWindow::new_file()
@@ -308,22 +301,22 @@ void MainWindow::save_file()
 
     Editor *editor = editors->at(current_tab_index);
 
-    if(editor->get_document_status() == document_status_t::DOCUMENT_MODIFIED) {
-        if(editor->get_default_document_status() == document_status_t::DOCUMENT_SAVED) {
-            QFile file(editor->get_document_path());
+    if(editor->document_status() == document_status_t::DOCUMENT_MODIFIED) {
+        if(editor->default_document_status() == document_status_t::DOCUMENT_SAVED) {
+            QFile file(editor->document_path());
 
             if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                printf("\tIOError while opening file [%s]\n", editor->get_document_path().toLatin1().data());
+                printf("\tIOError while opening file [%s]\n", editor->document_path().toLatin1().data());
                 return;
             }
 
-            file.write(editor->get_text_edit()->document()->toPlainText().toUtf8());
+            file.write(editor->text_edit()->document()->toPlainText().toUtf8());
 
             file.close();
 
-            editor->set_document_status(document_status_t::DOCUMENT_SAVED);
-            editor->set_default_document_status(document_status_t::DOCUMENT_SAVED);
-        } else if(editor->get_default_document_status() == document_status_t::DOCUMENT_NEW) {
+            editor->setDocument_status(document_status_t::DOCUMENT_SAVED);
+            editor->setdefault_document_status(document_status_t::DOCUMENT_SAVED);
+        } else if(editor->default_document_status() == document_status_t::DOCUMENT_NEW) {
             QString path = QDir::homePath() + "/Desktop";
             QString active_filter = supported_file_types.split(";;")[0];
             QString file_path = QFileDialog::getSaveFileName(this, tr("Save file"), path, supported_file_types, &active_filter);
@@ -338,24 +331,23 @@ void MainWindow::save_file()
             QFile file(file_path);
 
             if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                printf("\tIOError while opening file [%s]\n", editor->get_document_path().toLatin1().data());
+                printf("\tIOError while opening file [%s]\n", editor->document_path().toLatin1().data());
                 return;
             }
 
-            file.write(editor->get_text_edit()->document()->toPlainText().toUtf8());
+            file.write(editor->text_edit()->document()->toPlainText().toUtf8());
 
             file.close();
 
-            editor->set_document_name(file_name);
-            editor->set_document_path(file_path);
-            editor->set_document_status(document_status_t::DOCUMENT_SAVED);
-            editor->set_default_document_status(document_status_t::DOCUMENT_SAVED);
+            editor->setDocument_name(file_name);
+            editor->setDocument_path(file_path);
+            editor->setDocument_status(document_status_t::DOCUMENT_SAVED);
+            editor->setdefault_document_status(document_status_t::DOCUMENT_SAVED);
         }
 
         printf("\tFile sucessfully saved!\n");
-        emit editor->document_status_changed();
     } else {
-        printf("\t%s is not modified.\n", editor->get_document_name().toLatin1().data());
+        printf("\t%s is not modified.\n", editor->document_name().toLatin1().data());
         return;
     }
 }
@@ -368,6 +360,31 @@ void MainWindow::save_file_as()
 void MainWindow::quit()
 {
     printf("__FUNCTION__ = %s\n", __FUNCTION__);
+
+    for(int i = editors->size() - 1; i >= 0; i--) {
+        Editor *editor = editors->at(i);
+
+        if(editor->document_status() == document_status_t::DOCUMENT_MODIFIED) {
+            QMessageBox *msg = new QMessageBox(this);
+            msg->setWindowModality(Qt::WindowModal);
+            msg->setIcon(QMessageBox::Question);
+            msg->setText("Document \"" + editor->document_name() + "\" is modified.");
+            msg->setInformativeText("Do you want to save it?");
+            msg->setStandardButtons(QMessageBox::Save | QMessageBox::Discard);
+            msg->setDefaultButton(QMessageBox::Save);
+            int ret = msg->exec();
+            switch(ret) {
+                case QMessageBox::Save:
+                    tab_widget->setCurrentIndex(i);
+                    save_file();
+                    tab_close(i);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
     close();
 }
 
@@ -432,16 +449,30 @@ void MainWindow::tab_close(int index)
     tab_widget->setCurrentIndex(index);
 
     Editor *editor = editors->at(index);
-    QString name = editor->get_document_name();
+
+    if(editor->document_status() == document_status_t::DOCUMENT_MODIFIED) {
+        QMessageBox *msg = new QMessageBox(this);
+        msg->setWindowModality(Qt::WindowModal);
+        msg->setIcon(QMessageBox::Question);
+        msg->setText("Document \"" + editor->document_name() + "\" is modified.");
+        msg->setInformativeText("Do you want to save it?");
+        msg->setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        msg->setDefaultButton(QMessageBox::Save);
+        int ret = msg->exec();
+        switch(ret) {
+            case QMessageBox::Save:
+                save_file();
+                break;
+            case QMessageBox::Cancel:
+                return;
+                break;
+            default:
+                break;
+        }
+    }
 
     editors->removeAt(index);
     tab_widget->removeTab(index);
-
-    printf("\tEditors [");
-    for(int i = 0; i < editors->size(); i++) {
-        printf("%s%s", editors->at(i)->get_document_name().toLatin1().data(), (i + 1 == editors->size()) ? "" : ", ");
-    }
-    printf("]\n");
 
     delete editor;
     update_title();
@@ -463,7 +494,7 @@ void MainWindow::print_debug_info()
 
     QString status;
 
-    switch(editor->get_document_status()) {
+    switch(editor->document_status()) {
         case document_status_t::DOCUMENT_NEW:
             status = "New";
             break;
@@ -479,7 +510,7 @@ void MainWindow::print_debug_info()
     }
 
     printf("*** DEBUG ***\n");
-    printf("\tDocument name: %s\n", editor->get_document_name().toLatin1().data());
-    printf("\tDocument path: %s\n", editor->get_document_path().toLatin1().data());
+    printf("\tDocument name: %s\n", editor->document_name().toLatin1().data());
+    printf("\tDocument path: %s\n", editor->document_path().toLatin1().data());
     printf("\tDocument status: %s\n", status.toLatin1().data());
 }

@@ -16,10 +16,12 @@ CONFIG += c++11
 
 SOURCES += src/main.cpp\
         src/mainwindow.cpp \
-    src/editor.cpp
+    src/editor.cpp \
+    src/linenumbers.cpp
 
 HEADERS  += src/mainwindow.h \
-    src/editor.h
+    src/editor.h \
+    src/linenumbers.h
 
 RESOURCES += \
     resources.qrc
