@@ -1,3 +1,21 @@
+/**
+    qEdit - Lightweight IDE
+    Copyright (C) 2016  Marek Kouřil
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef EDITOR_H
 #define EDITOR_H
 
@@ -51,61 +69,50 @@ public:
     Editor(MainWindow *parent, QString path, QString name, QString content, document_status_t status);
     ~Editor();
 
-    QString document_name() const
-    {
+    QString document_name() const {
         return m_document_name;
     }
-    QString document_path() const
-    {
+    QString document_path() const {
         return m_document_path;
     }
 
-    document_status_t document_status() const
-    {
+    document_status_t document_status() const {
         return m_document_status;
     }
 
-    document_status_t default_document_status() const
-    {
+    document_status_t default_document_status() const {
         return m_default_document_status;
     }
 
-    MainWindow* parent() const
-    {
+    MainWindow* parent() const {
         return m_parent;
     }
 
-    LineNumbers* line_widget() const
-    {
+    LineNumbers* line_widget() const {
         return m_line_widget;
     }
 
-    QPlainTextEdit* text_edit() const
-    {
+    QPlainTextEdit* text_edit() const {
         return m_text_edit;
     }
 
-    QFrame* container() const
-    {
+    QFrame* container() const {
         return m_container;
     }
 
-    QHBoxLayout* layout() const
-    {
+    QHBoxLayout* layout() const {
         return m_layout;
     }
 
 public slots:
-    void setDocument_name(QString document_name)
-    {
+    void setDocument_name(QString document_name) {
         if (m_document_name == document_name)
             return;
 
         m_document_name = document_name;
         emit document_nameChanged(document_name);
     }
-    void setDocument_path(QString document_path)
-    {
+    void setDocument_path(QString document_path) {
         if (m_document_path == document_path)
             return;
 
@@ -113,8 +120,7 @@ public slots:
         emit document_pathChanged(document_path);
     }
 
-    void setDocument_status(document_status_t document_status)
-    {
+    void setDocument_status(document_status_t document_status) {
         if (m_document_status == document_status)
             return;
 
@@ -122,8 +128,7 @@ public slots:
         emit document_statusChanged(document_status);
     }
 
-    void setdefault_document_status(document_status_t default_document_status)
-    {
+    void setdefault_document_status(document_status_t default_document_status) {
         if (m_default_document_status == default_document_status)
             return;
 
