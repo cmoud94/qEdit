@@ -49,7 +49,6 @@ Editor::Editor(MainWindow *parent, QString path, QString name, QString content, 
     m_container->setLayout(layout());
 
     parent->update_title(document_name());
-    line_widget()->update();
 
     connect(text_edit(), &QPlainTextEdit::textChanged, [this] () {
         if(document_status() != document_status_t::DOCUMENT_MODIFIED && text_edit()->document()->isModified()) {
@@ -57,7 +56,9 @@ Editor::Editor(MainWindow *parent, QString path, QString name, QString content, 
         } else if(!text_edit()->document()->isModified()) {
             setDocument_status(default_document_status());
         }
+        line_widget()->update();
     });
+    connect(text_edit(), SIGNAL(updateRequest(QRect,int)), line_widget(), SLOT(scroll_update(QRect,int)));
 }
 
 Editor::~Editor()

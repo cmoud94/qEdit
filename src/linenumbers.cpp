@@ -33,11 +33,28 @@ LineNumbers::LineNumbers(Editor *parent, QFont font)
     line_widget->setFont(font);
     line_widget->setStyleSheet("background: #e0e0e0; color: #333");
     line_widget->setFixedWidth(get_font_width());
+    update();
+    line_widget->moveCursor(QTextCursor::Start);
 }
 
 LineNumbers::~LineNumbers()
 {
 
+}
+
+QPlainTextEdit *LineNumbers::get_line_widget()
+{
+    return line_widget;
+}
+
+int LineNumbers::get_font_width()
+{
+    return QFontMetrics(font).averageCharWidth();
+}
+
+int LineNumbers::get_max_font_width()
+{
+    return QFontMetrics(font).maxWidth();
 }
 
 void LineNumbers::update()
@@ -51,26 +68,21 @@ void LineNumbers::update()
 
     int i = 1;
     while(textBlock.isValid()) {
-        int text_width = QFontMetrics(font).width(textBlock.text());
+        int text_width = textBlock.text().length() * get_font_width();
         int n_wraps = qCeil(text_width / parent->text_edit()->width());
-        QString ln = QString::number(i) + "\n";
+        QString ln = QString::number(i);
 
-        printf("tw: %d\tnw: %d\n", text_width, n_wraps);
-
-        printf("ln: %d\t", i);
-
-        if(ln.length() > line_widget->width()) {
-            line_widget->setFixedWidth(ln.length());
+        if(ln.length() * get_max_font_width() > line_widget->width()) {
+            line_widget->setFixedWidth(ln.length() * get_max_font_width());
         }
 
+        if(n_wraps > 0) n_wraps++;
         for(int j = 0; j < n_wraps; j++) {
-            i++;
             ln.append("\n");
-            printf("X\t");
         }
         textBlock = textBlock.next();
         line_widget->appendPlainText(ln);
-        printf("\n");
+        i++;
     }
 }
 
@@ -79,17 +91,4 @@ void LineNumbers::scroll_update(QRect rect, int dy)
     if(dy) {
         line_widget->scroll(0, dy);
     }
-//    else { // ?
-//        line_widget->update(0, rect.y(), line_widget->width(), rect.height());
-//    }
-}
-
-QPlainTextEdit *LineNumbers::get_line_widget()
-{
-    return line_widget;
-}
-
-int LineNumbers::get_font_width()
-{
-    return QFontMetrics(font).maxWidth();
 }

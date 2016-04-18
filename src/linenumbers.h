@@ -35,9 +35,6 @@ public:
     LineNumbers(Editor *parent, QFont font);
     ~LineNumbers();
 
-    void update();
-    void scroll_update(QRect rect, int dy);
-
     QPlainTextEdit *get_line_widget();
 
 private:
@@ -47,6 +44,11 @@ private:
     QFont font;
 
     int get_font_width();
+    int get_max_font_width();
+
+public slots:
+    void update();
+    void scroll_update(QRect rect, int dy);
 };
 
 #endif // LINENUMBERS_H
