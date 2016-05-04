@@ -14,14 +14,9 @@ TEMPLATE = app
 CONFIG += c++11
 
 
-SOURCES += src/main.cpp\
-        src/mainwindow.cpp \
-    src/editor.cpp \
-    src/linenumbers.cpp
+SOURCES += src/main.cpp
 
-HEADERS  += src/mainwindow.h \
-    src/editor.h \
-    src/linenumbers.h
+HEADERS  +=
 
 RESOURCES += \
     resources.qrc
