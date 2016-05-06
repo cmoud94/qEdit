@@ -15,10 +15,12 @@ CONFIG += c++11
 
 
 SOURCES += src/main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    src/mainwindow.cpp
 
 HEADERS  += \
-    mainwindow.h
+    mainwindow.h \
+    src/mainwindow.h
 
 RESOURCES += \
     resources.qrc
