@@ -14,9 +14,11 @@ TEMPLATE = app
 CONFIG += c++11
 
 
-SOURCES += src/main.cpp
+SOURCES += src/main.cpp \
+    mainwindow.cpp
 
-HEADERS  +=
+HEADERS  += \
+    mainwindow.h
 
 RESOURCES += \
     resources.qrc
