@@ -9,6 +9,7 @@ class QTabWidget;
 class QStatusBar;
 class QIcon;
 class QMessageBox;
+class Editor;
 
 class MainWindow : public QMainWindow
 {
@@ -55,17 +56,15 @@ private slots:
 
     void help_about ( );
 
-    void tab_close_shortcut ( );
+    void tab_close ( int index );
 
 private:
-    // Constants
     const QString WIN_TITLE = "qEdit";
 
     const int WIN_MIN_WIDTH = 400;
 
     const int WIN_MIN_HEIGHT = 300;
 
-    // Attributes
     QString m_window_title;
 
     QMenuBar* m_menu_bar;
@@ -84,11 +83,10 @@ private:
 
     QTabWidget* m_tab_widget;
 
-//    QList<Editor*>* m_editors;
+    QList< Editor* >* m_editors;
 
     QStatusBar* m_status_bar;
 
-    // Methods
     void menu_bar_init ( );
 
     void tool_bar_init ( );
@@ -97,7 +95,7 @@ private:
 
     void status_bar_init ( );
 
-    void tab_new ( );
+    void tab_new ( QString title, QString content, QString path );
 
     int dialog_show ( QString text, QString secondary_text, int icon, int buttons, int default_button );
 };

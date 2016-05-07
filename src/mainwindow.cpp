@@ -30,6 +30,7 @@
 #include <stdlib.h>
 
 #include "mainwindow.h"
+#include "editor.h"
 
 //*****************************************************************************
 /**
@@ -38,16 +39,17 @@
  */
 MainWindow::MainWindow ( QMainWindow* parent )
 {
+    m_editors = new QList< Editor* >( );
+
     setWindowTitle ( WIN_TITLE );
     setMinimumWidth ( WIN_MIN_WIDTH );
     setMinimumHeight ( WIN_MIN_HEIGHT );
     setWindowIcon ( QIcon ( ":/icons/qEdit_icon.png" ) );
 
     menu_bar_init ( );
-
     tool_bar_init ( );
-
     tab_widget_init ( );
+//	status_bar_init ( );
 
     setFocus ( );
 }
@@ -71,6 +73,7 @@ void MainWindow::window_title_update ( QString new_title )
 void MainWindow::file_new ( )
 {
     printf ( "%s\n", __FUNCTION__ );
+    tab_new ( "Untitled document", "", "" );
 }
 
 //*****************************************************************************
@@ -95,12 +98,14 @@ void MainWindow::file_save_as ( )
 void MainWindow::file_close ( )
 {
     printf ( "%s\n", __FUNCTION__ );
+    tab_close ( m_tab_widget->currentIndex ( ) );
 }
 
 //*****************************************************************************
 void MainWindow::file_quit ( )
 {
     printf ( "%s\n", __FUNCTION__ );
+    close ( );
 }
 
 //*****************************************************************************
@@ -164,9 +169,13 @@ void MainWindow::help_about ( )
 }
 
 //*****************************************************************************
-void MainWindow::tab_close_shortcut ( )
+/**
+ * @brief MainWindow::tab_close
+ * @param index
+ */
+void MainWindow::tab_close ( int index )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    m_tab_widget->removeTab ( index );
 }
 
 //*****************************************************************************
@@ -322,25 +331,36 @@ void MainWindow::tool_bar_init ( )
 }
 
 //*****************************************************************************
+/**
+ * @brief MainWindow::tab_widget_init
+ */
 void MainWindow::tab_widget_init ( )
 {
     m_tab_widget = new QTabWidget ( this );
-    m_tab_widget->setTabBarAutoHide ( true );
     m_tab_widget->setTabsClosable ( true );
 
     setCentralWidget ( m_tab_widget );
+
+    connect ( m_tab_widget, SIGNAL ( tabCloseRequested ( int ) ), this, SLOT ( tab_close ( int ) ) );
 }
 
 //*****************************************************************************
+/**
+ * @brief MainWindow::status_bar_init
+ */
 void MainWindow::status_bar_init ( )
 {
     printf ( "%s\n", __FUNCTION__ );
 }
 
 //*****************************************************************************
-void MainWindow::tab_new ( )
+void MainWindow::tab_new ( QString title, QString content, QString path )
 {
     printf ( "%s\n", __FUNCTION__ );
+    Editor* editor = new Editor ( this, title, content, path );
+    m_editors->append ( editor );
+    m_tab_widget->addTab ( new QToolButton ( ), QIcon ( ":/icons/document-new-7.png" ), title );
+    m_tab_widget->setCurrentIndex ( m_tab_widget->count ( ) - 1 );
 }
 
 //*****************************************************************************
