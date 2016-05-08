@@ -19,7 +19,44 @@
 #include "editor.h"
 #include "mainwindow.h"
 
-Editor::Editor ( MainWindow *parent, QString title, QString content, QString path )
+//*****************************************************************************
+Editor::Editor ( MainWindow *parent, QString title, QString content, QString path, int document_status )
 {
+    m_parent = parent;
+    m_title = title;
+    m_path = path;
+    m_document_status = ( document_status_t ) document_status;
+    m_default_document_status = ( document_status_t ) document_status;
 
+    m_widget = new QWidget ( );
+    m_layout = new QHBoxLayout ( m_widget );
+    m_text_widget = new QPlainTextEdit ( m_widget );
+
+    m_layout->addWidget ( m_text_widget );
+    m_widget->setLayout ( m_layout );
+
+    m_layout->setContentsMargins ( 0, 0, 0, 0 );
+
+    m_text_widget->setUndoRedoEnabled ( false );
+    m_text_widget->setPlainText ( content );
+    m_text_widget->setUndoRedoEnabled ( true );
+}
+
+//*****************************************************************************
+QWidget* Editor::widget ( )
+{
+    return m_widget;
+}
+
+//*****************************************************************************
+QPlainTextEdit* Editor::text_edit ( )
+{
+    return m_text_widget;
+}
+
+//*****************************************************************************
+QString Editor::title_from_path ( QString path )
+{
+    QStringList tmp = path.split ( "/" );
+    return tmp.at ( tmp.size ( ) - 1 );
 }

@@ -2,13 +2,16 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMenuBar>
+#include <QMenu>
+#include <QToolBar>
+#include <QTabWidget>
+#include <QStatusBar>
+#include <QList>
+#include <QIcon>
+#include <QMessageBox>
+#include <QToolButton>
 
-class QMenuBar;
-class QToolBar;
-class QTabWidget;
-class QStatusBar;
-class QIcon;
-class QMessageBox;
 class Editor;
 
 class MainWindow : public QMainWindow
@@ -95,7 +98,7 @@ private:
 
     void status_bar_init ( );
 
-    void tab_new ( QString title, QString content, QString path );
+    void tab_new ( QString title, QString content, QString path, int document_status );
 
     int dialog_show ( QString text, QString secondary_text, int icon, int buttons, int default_button );
 };

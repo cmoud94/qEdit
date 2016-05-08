@@ -16,16 +16,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <QMenuBar>
-#include <QMenu>
-#include <QToolBar>
-#include <QTabWidget>
-#include <QStatusBar>
-#include <QList>
-#include <QIcon>
-#include <QMessageBox>
-#include <QToolButton>
-
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -33,10 +23,6 @@
 #include "editor.h"
 
 //*****************************************************************************
-/**
- * @brief MainWindow::MainWindow
- * @param parent
- */
 MainWindow::MainWindow ( QMainWindow* parent )
 {
     m_editors = new QList< Editor* >( );
@@ -55,12 +41,10 @@ MainWindow::MainWindow ( QMainWindow* parent )
 }
 
 //*****************************************************************************
-/**
- * @brief MainWindow::~MainWindow
- */
 MainWindow::~MainWindow ( )
 {
-
+    delete m_tool_bar_icons;
+    delete m_editors;
 }
 
 //*****************************************************************************
@@ -72,8 +56,7 @@ void MainWindow::window_title_update ( QString new_title )
 //*****************************************************************************
 void MainWindow::file_new ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
-    tab_new ( "Untitled document", "", "" );
+    tab_new ( "Untitled document", "", "", Editor::document_status_t::NEW );
 }
 
 //*****************************************************************************
@@ -97,14 +80,12 @@ void MainWindow::file_save_as ( )
 //*****************************************************************************
 void MainWindow::file_close ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
     tab_close ( m_tab_widget->currentIndex ( ) );
 }
 
 //*****************************************************************************
 void MainWindow::file_quit ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
     close ( );
 }
 
@@ -169,19 +150,13 @@ void MainWindow::help_about ( )
 }
 
 //*****************************************************************************
-/**
- * @brief MainWindow::tab_close
- * @param index
- */
 void MainWindow::tab_close ( int index )
 {
     m_tab_widget->removeTab ( index );
+    m_editors->removeAt ( index );
 }
 
 //*****************************************************************************
-/**
- * @brief MainWindow::menu_bar_init
- */
 void MainWindow::menu_bar_init ( )
 {
     m_menu_bar = new QMenuBar ( this );
@@ -227,9 +202,6 @@ void MainWindow::menu_bar_init ( )
 }
 
 //*****************************************************************************
-/**
- * @brief MainWindow::tool_bar_init
- */
 void MainWindow::tool_bar_init ( )
 {
     m_tool_bar_icons = new QList< QIcon >( );
@@ -331,9 +303,6 @@ void MainWindow::tool_bar_init ( )
 }
 
 //*****************************************************************************
-/**
- * @brief MainWindow::tab_widget_init
- */
 void MainWindow::tab_widget_init ( )
 {
     m_tab_widget = new QTabWidget ( this );
@@ -345,34 +314,22 @@ void MainWindow::tab_widget_init ( )
 }
 
 //*****************************************************************************
-/**
- * @brief MainWindow::status_bar_init
- */
 void MainWindow::status_bar_init ( )
 {
     printf ( "%s\n", __FUNCTION__ );
 }
 
 //*****************************************************************************
-void MainWindow::tab_new ( QString title, QString content, QString path )
+void MainWindow::tab_new ( QString title, QString content, QString path, int document_status )
 {
-    printf ( "%s\n", __FUNCTION__ );
-    Editor* editor = new Editor ( this, title, content, path );
+    Editor* editor = new Editor ( this, title, content, path, document_status );
     m_editors->append ( editor );
-    m_tab_widget->addTab ( new QToolButton ( ), QIcon ( ":/icons/document-new-7.png" ), title );
-    m_tab_widget->setCurrentIndex ( m_tab_widget->count ( ) - 1 );
+    int r = m_tab_widget->addTab ( editor->widget ( ), QIcon ( ":/icons/document-new-7.png" ), title );
+    m_tab_widget->setCurrentIndex ( r );
+    editor->text_edit ( )->setFocus ( );
 }
 
 //*****************************************************************************
-/**
- * @brief MainWindow::dialog_show
- * @param text
- * @param secondary_text
- * @param icon
- * @param buttons
- * @param default_button
- * @return
- */
 int MainWindow::dialog_show ( QString text, QString secondary_text, int icon, int buttons, int default_button )
 {
     QMessageBox msg;
