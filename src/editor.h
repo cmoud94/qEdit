@@ -11,6 +11,11 @@ class Editor : public QWidget
 {
     Q_OBJECT
 
+signals:
+    void path_changed ( QString new_path );
+
+    void document_status_changed ( int index );
+
 public:
     enum document_status_t
     {
@@ -29,12 +34,24 @@ public:
 
     document_status_t document_status ( );
 
+    void set_document_status ( document_status_t new_status );
+
+    document_status_t default_document_status ( );
+
+    void set_default_document_status ( document_status_t new_status );
+
     QString title ( );
+
+    QString path ( );
+
+    void set_path ( QString new_path );
 
 public slots:
 
 private slots:
     void document_status_change ( );
+
+    void path_change ( QString new_path );
 
 private:
     MainWindow* m_parent;

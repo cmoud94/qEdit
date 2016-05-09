@@ -25,8 +25,12 @@ public:
 
     ~MainWindow ( );
 
+    QTabWidget* tab_widget ( );
+
 public slots:
     void window_title_update ( QString new_title );
+
+    void document_status_changed ( int index );
 
 private slots:
     void file_new ( );
@@ -111,6 +115,8 @@ private:
     int dialog_show ( QString text, QString secondary_text, int icon, int buttons, int default_button );
 
     void load_supported_file_types ( );
+
+    void file_write ( QString path, Editor* editor );
 };
 
 #endif // MAINWINDOW_H

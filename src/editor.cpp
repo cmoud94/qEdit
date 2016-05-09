@@ -42,6 +42,8 @@ Editor::Editor ( MainWindow *parent, QString title, QString content, QString pat
     m_text_widget->setUndoRedoEnabled ( true );
 
     connect ( m_text_widget, SIGNAL ( textChanged ( ) ), this, SLOT ( document_status_change ( ) ) );
+    connect ( m_text_widget, SIGNAL ( modificationChanged ( bool ) ), this, SLOT ( document_status_change ( ) ) );
+    connect ( this, SIGNAL ( path_changed ( QString ) ), this, SLOT ( path_change ( QString ) ) );
 }
 
 //*****************************************************************************
@@ -70,20 +72,62 @@ Editor::document_status_t Editor::document_status ( )
 }
 
 //*****************************************************************************
+void Editor::set_document_status ( document_status_t new_status )
+{
+    m_document_status = new_status;
+    emit document_status_changed ( m_parent->tab_widget ( )->currentIndex ( ) );
+}
+
+//*****************************************************************************
+Editor::document_status_t Editor::default_document_status ( )
+{
+    return m_default_document_status;
+}
+
+//*****************************************************************************
+void Editor::set_default_document_status ( Editor::document_status_t new_status )
+{
+    m_default_document_status =  new_status;
+}
+
+//*****************************************************************************
 QString Editor::title ( )
 {
     return m_title;
 }
 
 //*****************************************************************************
+QString Editor::path ( )
+{
+    return m_path;
+}
+
+//*****************************************************************************
+void Editor::set_path ( QString new_path )
+{
+    m_path = new_path;
+    emit path_changed ( new_path );
+}
+
+//*****************************************************************************
 void Editor::document_status_change ( )
 {
-    if ( m_document_status == document_status_t::MODIFIED )
+    if ( m_text_widget->document ( )->isModified ( ) )
     {
-        return;
+        m_document_status = document_status_t::MODIFIED;
+    }
+    else
+    {
+        m_document_status = m_default_document_status;
     }
 
-    m_document_status = document_status_t::MODIFIED;
+    int index = m_parent->tab_widget ( )->currentIndex ( );
+    emit document_status_changed ( index );
+}
 
-
+//*****************************************************************************
+void Editor::path_change ( QString new_path )
+{
+    m_title = Editor::title_from_path ( new_path );
+    m_parent->tab_widget ( )->setTabText ( m_parent->tab_widget ( )->currentIndex ( ), m_title );
 }

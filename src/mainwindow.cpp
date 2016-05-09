@@ -50,6 +50,12 @@ MainWindow::~MainWindow ( )
 }
 
 //*****************************************************************************
+QTabWidget* MainWindow::tab_widget ( )
+{
+    return m_tab_widget;
+}
+
+//*****************************************************************************
 void MainWindow::window_title_update ( QString new_title )
 {
     if ( new_title == "" )
@@ -65,9 +71,27 @@ void MainWindow::window_title_update ( QString new_title )
 }
 
 //*****************************************************************************
+void MainWindow::document_status_changed ( int index )
+{
+    QString new_title = "";
+
+    if ( m_editors->at ( index )->document_status ( ) == Editor::document_status_t::MODIFIED )
+    {
+        new_title = "* " + m_editors->at ( index )->title ( );
+    }
+    else
+    {
+        new_title = m_editors->at ( index )->title ( );
+    }
+
+    m_tab_widget->setTabText ( index, new_title );
+    emit tab_changed ( index );
+}
+
+//*****************************************************************************
 void MainWindow::file_new ( )
 {
-    tab_new ( "Untitled document", "", "", Editor::document_status_t::NEW );
+    tab_new ( "Untitled", "", "", Editor::document_status_t::NEW );
 }
 
 //*****************************************************************************
@@ -95,12 +119,9 @@ void MainWindow::file_open ( )
     }
 
     QString title = Editor::title_from_path ( path );
-    QString content = "";
+    QTextStream in ( &f );
 
-    while ( !f.atEnd ( ) )
-    {
-        content += f.readLine ( );
-    }
+    QString content = in.readAll ( );
 
     f.close ( );
 
@@ -110,7 +131,37 @@ void MainWindow::file_open ( )
 //*****************************************************************************
 void MainWindow::file_save ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    int index = m_tab_widget->currentIndex ( );
+
+    if ( index == -1 )
+    {
+        return;
+    }
+
+    Editor* editor = m_editors->at ( index );
+
+    if ( editor->path ( ) != "" &&
+         editor->default_document_status ( ) == Editor::document_status_t::SAVED )
+    {
+        file_write ( editor->path ( ), editor );
+    }
+    else if ( editor->path ( ) == "" &&
+              editor->default_document_status ( ) == Editor::document_status_t::NEW )
+    {
+        QFileDialog d;
+        QString path = d.getSaveFileName ( this,
+                                           "Save file",
+                                           QDir::homePath ( ),
+                                           m_file_type_filter,
+                                           &m_default_file_type );
+
+        if ( path != "" )
+        {
+            file_write ( path, editor );
+            editor->set_path ( path );
+            editor->set_default_document_status ( Editor::document_status_t::SAVED );
+        }
+    }
 }
 
 //*****************************************************************************
@@ -207,7 +258,7 @@ void MainWindow::tab_changed ( int index )
         return;
     }
 
-    window_title_update ( m_editors->at ( index )->title ( ) );
+    window_title_update ( m_tab_widget->tabText ( index ) );
 }
 
 //*****************************************************************************
@@ -382,6 +433,8 @@ void MainWindow::tab_new ( QString title, QString content, QString path, int doc
     int r = m_tab_widget->addTab ( editor->widget ( ), QIcon ( ":/icons/document-new-7.png" ), title );
     m_tab_widget->setCurrentIndex ( r );
     editor->text_edit ( )->setFocus ( );
+
+    connect ( editor, &Editor::document_status_changed, this, &MainWindow::document_status_changed );
 }
 
 //*****************************************************************************
@@ -421,4 +474,26 @@ void MainWindow::load_supported_file_types ( )
 
     m_file_type_filter = content;
     m_default_file_type = content.split ( ";;" ).at ( 0 );
+}
+
+//*****************************************************************************
+void MainWindow::file_write ( QString path, Editor *editor )
+{
+    QFile f ( path );
+
+    if ( !f.open ( QFile::WriteOnly | QFile::Text ) )
+    {
+        printf ( "Can't open file for saving.\n" );
+        return;
+    }
+
+    f.reset ( );
+
+    QTextStream out ( &f );
+
+    out << editor->text_edit ( )->document ( )->toPlainText ( );
+
+    f.close ( );
+
+    editor->set_document_status ( Editor::document_status_t::SAVED );
 }
