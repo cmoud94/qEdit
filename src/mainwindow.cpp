@@ -27,6 +27,8 @@ MainWindow::MainWindow ( QMainWindow* parent )
 {
     m_editors = new QList< Editor* >( );
 
+    load_supported_file_types ( );
+
     setWindowTitle ( WIN_TITLE );
     setMinimumWidth ( WIN_MIN_WIDTH );
     setMinimumHeight ( WIN_MIN_HEIGHT );
@@ -62,7 +64,38 @@ void MainWindow::file_new ( )
 //*****************************************************************************
 void MainWindow::file_open ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    QFileDialog d;
+    QString path = d.getOpenFileName ( this,
+                                       "Open file",
+                                       QDir::homePath ( ),
+                                       m_file_type_filter,
+                                       &m_default_file_type );
+
+    if ( path == "" )
+    {
+        printf ( "%s: No file selected.\n", __FUNCTION__ );
+        return;
+    }
+
+    QFile f ( path );
+
+    if ( !f.open ( QFile::ReadOnly | QFile::Text ) )
+    {
+        printf ( "%s: Can't open file [%s]", __FUNCTION__, path.toLatin1 ( ).data ( ) );
+        return;
+    }
+
+    QString title = Editor::title_from_path ( path );
+    QString content = "";
+
+    while ( !f.atEnd ( ) )
+    {
+        content += f.readLine ( );
+    }
+
+    f.close ( );
+
+    tab_new ( title, content, path, Editor::document_status_t::SAVED );
 }
 
 //*****************************************************************************
@@ -339,4 +372,31 @@ int MainWindow::dialog_show ( QString text, QString secondary_text, int icon, in
     msg.setStandardButtons ( ( QMessageBox::StandardButtons ) buttons );
     msg.setDefaultButton ( ( QMessageBox::StandardButton ) default_button );
     return msg.exec ( );
+}
+
+//*****************************************************************************
+void MainWindow::load_supported_file_types ( )
+{
+    QFile f ( ":/files/files/supported_file_extensions.txt" );
+
+    if ( !f.open ( QFile::ReadOnly | QFile::Text ) )
+    {
+        printf ( "%s: Can't load supported file types.\n", __FUNCTION__ );
+        return;
+    }
+
+    QString content = "";
+
+    while ( !f.atEnd ( ) )
+    {
+        QString line = f.readLine ( );
+        QString name = line.split ( "=" ).at ( 0 );
+        QString type = line.split ( "=" ).at ( 1 ).split ( "\n" ).at ( 0 );
+        content += name + "(*." + type + ");;";
+    }
+
+    f.close ( );
+
+    m_file_type_filter = content;
+    m_default_file_type = content.split ( ";;" ).at ( 0 );
 }

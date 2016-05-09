@@ -11,6 +11,8 @@
 #include <QIcon>
 #include <QMessageBox>
 #include <QToolButton>
+#include <QFileDialog>
+#include <QDebug>
 
 class Editor;
 
@@ -90,6 +92,10 @@ private:
 
     QStatusBar* m_status_bar;
 
+    QString m_file_type_filter;
+
+    QString m_default_file_type;
+
     void menu_bar_init ( );
 
     void tool_bar_init ( );
@@ -101,6 +107,8 @@ private:
     void tab_new ( QString title, QString content, QString path, int document_status );
 
     int dialog_show ( QString text, QString secondary_text, int icon, int buttons, int default_button );
+
+    void load_supported_file_types ( );
 };
 
 #endif // MAINWINDOW_H
