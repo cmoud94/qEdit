@@ -63,6 +63,8 @@ private slots:
 
     void tab_close ( int index );
 
+    void tab_changed ( int index );
+
 private:
     const QString WIN_TITLE = "qEdit";
 

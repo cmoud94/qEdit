@@ -40,6 +40,8 @@ Editor::Editor ( MainWindow *parent, QString title, QString content, QString pat
     m_text_widget->setUndoRedoEnabled ( false );
     m_text_widget->setPlainText ( content );
     m_text_widget->setUndoRedoEnabled ( true );
+
+    connect ( m_text_widget, SIGNAL ( textChanged ( ) ), this, SLOT ( document_status_change ( ) ) );
 }
 
 //*****************************************************************************
@@ -59,4 +61,29 @@ QString Editor::title_from_path ( QString path )
 {
     QStringList tmp = path.split ( "/" );
     return tmp.at ( tmp.size ( ) - 1 );
+}
+
+//*****************************************************************************
+Editor::document_status_t Editor::document_status ( )
+{
+    return m_document_status;
+}
+
+//*****************************************************************************
+QString Editor::title ( )
+{
+    return m_title;
+}
+
+//*****************************************************************************
+void Editor::document_status_change ( )
+{
+    if ( m_document_status == document_status_t::MODIFIED )
+    {
+        return;
+    }
+
+    m_document_status = document_status_t::MODIFIED;
+
+
 }

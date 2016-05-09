@@ -52,7 +52,16 @@ MainWindow::~MainWindow ( )
 //*****************************************************************************
 void MainWindow::window_title_update ( QString new_title )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    if ( new_title == "" )
+    {
+        m_window_title = WIN_TITLE;
+    }
+    else
+    {
+        m_window_title = new_title + " - " + WIN_TITLE;
+    }
+
+    setWindowTitle ( m_window_title );
 }
 
 //*****************************************************************************
@@ -187,6 +196,18 @@ void MainWindow::tab_close ( int index )
 {
     m_tab_widget->removeTab ( index );
     m_editors->removeAt ( index );
+}
+
+//*****************************************************************************
+void MainWindow::tab_changed ( int index )
+{
+    if ( index == -1 )
+    {
+        window_title_update ( "" );
+        return;
+    }
+
+    window_title_update ( m_editors->at ( index )->title ( ) );
 }
 
 //*****************************************************************************
@@ -344,6 +365,7 @@ void MainWindow::tab_widget_init ( )
     setCentralWidget ( m_tab_widget );
 
     connect ( m_tab_widget, SIGNAL ( tabCloseRequested ( int ) ), this, SLOT ( tab_close ( int ) ) );
+    connect ( m_tab_widget, SIGNAL ( currentChanged ( int ) ), this, SLOT ( tab_changed ( int ) ) );
 }
 
 //*****************************************************************************

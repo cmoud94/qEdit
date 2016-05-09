@@ -12,6 +12,13 @@ class Editor : public QWidget
     Q_OBJECT
 
 public:
+    enum document_status_t
+    {
+        NEW = 0,
+        MODIFIED = 1,
+        SAVED = 2
+    };
+
     Editor ( MainWindow* parent, QString title, QString content, QString path, int document_status );
 
     QWidget* widget ( );
@@ -20,18 +27,14 @@ public:
 
     static QString title_from_path ( QString path );
 
-    enum document_status_t
-    {
-        NEW = 0,
-        MODIFIED = 1,
-        SAVED = 2
-    };
+    document_status_t document_status ( );
+
+    QString title ( );
 
 public slots:
-//    void path_update ( );
 
 private slots:
-//    void title_update ( );
+    void document_status_change ( );
 
 private:
     MainWindow* m_parent;
