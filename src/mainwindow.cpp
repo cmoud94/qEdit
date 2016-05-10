@@ -167,7 +167,28 @@ void MainWindow::file_save ( )
 //*****************************************************************************
 void MainWindow::file_save_as ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    int index = m_tab_widget->currentIndex ( );
+
+    if ( index == -1 )
+    {
+        return;
+    }
+
+    Editor* editor = m_editors->at ( index );
+
+    QFileDialog d;
+    QString path = d.getSaveFileName ( this,
+                                       "Save file as ...",
+                                       QDir::homePath ( ),
+                                       m_file_type_filter,
+                                       &m_default_file_type );
+
+    if ( path != "" )
+    {
+        file_write ( path, editor );
+        editor->set_path ( path );
+        editor->set_default_document_status ( Editor::document_status_t::SAVED );
+    }
 }
 
 //*****************************************************************************
