@@ -194,7 +194,37 @@ void MainWindow::file_save_as ( )
 //*****************************************************************************
 void MainWindow::file_close ( )
 {
-    tab_close ( m_tab_widget->currentIndex ( ) );
+    int index = m_tab_widget->currentIndex ( );
+
+    if ( index == -1 )
+    {
+        return;
+    }
+
+    Editor* editor = m_editors->at ( index );
+
+    if ( editor->document_status ( ) != Editor::document_status_t::SAVED )
+    {
+        int r = dialog_show ( "File not saved.",
+                              "Do you want to save file [" + editor->title ( ) + "] before closing?",
+                              QMessageBox::Question,
+                              QMessageBox::Discard | QMessageBox::Cancel | QMessageBox::Yes,
+                              QMessageBox::Yes );
+
+        switch ( r )
+        {
+            case QMessageBox::Cancel:
+                return;
+                break;
+            case QMessageBox::Yes:
+                file_save ( );
+                break;
+            default:
+                break;
+        }
+    }
+
+    tab_close ( index );
 }
 
 //*****************************************************************************
@@ -436,7 +466,7 @@ void MainWindow::tab_widget_init ( )
 
     setCentralWidget ( m_tab_widget );
 
-    connect ( m_tab_widget, SIGNAL ( tabCloseRequested ( int ) ), this, SLOT ( tab_close ( int ) ) );
+    connect ( m_tab_widget, SIGNAL ( tabCloseRequested ( int ) ), this, SLOT ( file_close ( ) ) );
     connect ( m_tab_widget, SIGNAL ( currentChanged ( int ) ), this, SLOT ( tab_changed ( int ) ) );
 }
 
