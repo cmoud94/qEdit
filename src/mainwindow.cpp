@@ -21,6 +21,7 @@
 
 #include "mainwindow.h"
 #include "editor.h"
+#include "preferences.h"
 
 //*****************************************************************************
 MainWindow::MainWindow ( QMainWindow* parent )
@@ -106,7 +107,6 @@ void MainWindow::file_open ( )
 
     if ( path == "" )
     {
-        printf ( "%s: No file selected.\n", __FUNCTION__ );
         return;
     }
 
@@ -114,7 +114,11 @@ void MainWindow::file_open ( )
 
     if ( !f.open ( QFile::ReadOnly | QFile::Text ) )
     {
-        printf ( "%s: Can't open file [%s]", __FUNCTION__, path.toLatin1 ( ).data ( ) );
+        dialog_show ( "Can't open file.",
+                      "Can't open file [" + path + "].",
+                      QMessageBox::Warning,
+                      QMessageBox::Ok,
+                      QMessageBox::Ok );
         return;
     }
 
@@ -308,7 +312,8 @@ void MainWindow::edit_paste ( )
 //*****************************************************************************
 void MainWindow::edit_preferences ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    Preferences p ( this );
+    p.exec ( );
 }
 
 //*****************************************************************************
@@ -533,13 +538,13 @@ void MainWindow::tab_new ( QString title, QString content, QString path, int doc
 //*****************************************************************************
 int MainWindow::dialog_show ( QString text, QString secondary_text, int icon, int buttons, int default_button )
 {
-    QMessageBox msg;
-    msg.setText ( text );
-    msg.setInformativeText ( secondary_text );
-    msg.setIcon ( ( QMessageBox::Icon ) icon );
-    msg.setStandardButtons ( ( QMessageBox::StandardButtons ) buttons );
-    msg.setDefaultButton ( ( QMessageBox::StandardButton ) default_button );
-    return msg.exec ( );
+    QMessageBox* msg = new QMessageBox ( this );
+    msg->setText ( text );
+    msg->setInformativeText ( secondary_text );
+    msg->setIcon ( ( QMessageBox::Icon ) icon );
+    msg->setStandardButtons ( ( QMessageBox::StandardButtons ) buttons );
+    msg->setDefaultButton ( ( QMessageBox::StandardButton ) default_button );
+    return msg->exec ( );
 }
 
 //*****************************************************************************
