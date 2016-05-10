@@ -22,7 +22,7 @@ public:
     ~Preferences ( );
 
 private:
-    QString m_config_file_path = ":/files/files/supported_file_extensions.txt";
+    QString m_config_file_path = ":/files/files/config.conf";
 
     QList< QString >* m_config_keys;
 
@@ -64,9 +64,11 @@ private:
 
     QPushButton* m_close_btn;
 
-    QString read_config_file ( );
+    void read_config_file ( );
 
     void write_config_file ( );
+
+    void update_widgets ( );
 };
 
 #endif // PREFERENCES_H

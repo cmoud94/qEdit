@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "preferences.h"
 #include "mainwindow.h"
 
@@ -113,6 +116,8 @@ Preferences::Preferences ( MainWindow* parent )
     setLayout ( m_layout );
 
     setModal ( true );
+
+    read_config_file ( );
 }
 
 //*****************************************************************************
@@ -124,13 +129,97 @@ Preferences::~Preferences ( )
 }
 
 //*****************************************************************************
-QString Preferences::read_config_file ( )
+void Preferences::read_config_file ( )
 {
-    return "";
+    QFile f ( m_config_file_path );
+
+    if ( !f.open ( QFile::ReadOnly | QFile::Text ) )
+    {
+        printf ( "%s: Can't read config file.", __FUNCTION__ );
+        return;
+    }
+
+    QTextStream in ( &f );
+
+    QString config = in.readAll ( );
+
+    f.close ( );
+
+    QStringList conf_list = config.split ( "\n", QString::SkipEmptyParts );
+
+    for ( int i = 0; i < conf_list.size ( ); i++ )
+    {
+        QStringList conf_line = conf_list.at ( i ).split ( "=" );
+        m_config_values->append ( conf_line.at ( 1 ) );
+    }
+
+    update_widgets ( );
 }
 
 //*****************************************************************************
 void Preferences::write_config_file ( )
 {
 
+}
+
+//*****************************************************************************
+void Preferences::update_widgets ( )
+{
+    for ( int i = 0; i < m_config_values->size ( ); i++ )
+    {
+        switch ( i )
+        {
+            case 0:
+                if ( m_config_values->at ( i ).toInt ( ) == 1 )
+                {
+                    m_text_wrap_chkbox->setCheckState ( Qt::Checked );
+                }
+                else
+                {
+                    m_text_wrap_chkbox->setCheckState ( Qt::Unchecked );
+                }
+                break;
+            case 1:
+                if ( m_config_values->at ( i ).toInt ( ) == 1 )
+                {
+                    m_text_wrap_words_chkbox->setCheckState ( Qt::Checked );
+                }
+                else
+                {
+                    m_text_wrap_words_chkbox->setCheckState ( Qt::Unchecked );
+                }
+                break;
+            case 2:
+                if ( m_config_values->at ( i ).toInt ( ) == 1 )
+                {
+                    m_ln_nums_chkbox->setCheckState ( Qt::Checked );
+                }
+                else
+                {
+                    m_ln_nums_chkbox->setCheckState ( Qt::Unchecked );
+                }
+                break;
+            case 3:
+                if ( m_config_values->at ( i ).toInt ( ) == 1 )
+                {
+                    m_curr_ln_chkbox->setCheckState ( Qt::Checked );
+                }
+                else
+                {
+                    m_curr_ln_chkbox->setCheckState ( Qt::Unchecked );
+                }
+                break;
+            case 4:
+                m_font_config_btn->setText ( m_config_values->at ( i ) );
+                break;
+            case 5:
+                m_font_config_btn->setText ( m_font_config_btn->text ( ) + " | " + m_config_values->at ( i ) );
+                break;
+            case 7:
+                m_tab_width_spinbox->setValue ( m_config_values->at ( i ).toInt ( ) );
+                break;
+            default:
+                break;
+        }
+    }
 }
