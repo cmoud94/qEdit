@@ -203,7 +203,8 @@ void MainWindow::file_close ( )
 
     Editor* editor = m_editors->at ( index );
 
-    if ( editor->document_status ( ) != Editor::document_status_t::SAVED )
+    if ( editor->document_status ( ) != Editor::document_status_t::SAVED &&
+         editor->document_status ( ) != editor->default_document_status ( ) )
     {
         int r = dialog_show ( "File not saved.",
                               "Do you want to save file [" + editor->title ( ) + "] before closing?",
@@ -230,6 +231,12 @@ void MainWindow::file_close ( )
 //*****************************************************************************
 void MainWindow::file_quit ( )
 {
+    for ( int i = m_editors->size ( ) - 1; i >= 0; i-- )
+    {
+        m_tab_widget->setCurrentIndex ( i );
+        file_close ( );
+    }
+
     close ( );
 }
 
