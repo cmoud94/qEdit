@@ -243,31 +243,66 @@ void MainWindow::file_quit ( )
 //*****************************************************************************
 void MainWindow::edit_undo ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    int index = m_tab_widget->currentIndex ( );
+
+    if ( index == -1 )
+    {
+        return;
+    }
+
+    m_editors->at ( index )->text_edit ( )->undo ( );
 }
 
 //*****************************************************************************
 void MainWindow::edit_redo ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    int index = m_tab_widget->currentIndex ( );
+
+    if ( index == -1 )
+    {
+        return;
+    }
+
+    m_editors->at ( index )->text_edit ( )->redo ( );
 }
 
 //*****************************************************************************
 void MainWindow::edit_cut ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    int index = m_tab_widget->currentIndex ( );
+
+    if ( index == -1 )
+    {
+        return;
+    }
+
+    m_editors->at ( index )->text_edit ( )->cut ( );
 }
 
 //*****************************************************************************
 void MainWindow::edit_copy ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    int index = m_tab_widget->currentIndex ( );
+
+    if ( index == -1 )
+    {
+        return;
+    }
+
+    m_editors->at ( index )->text_edit ( )->copy ( );
 }
 
 //*****************************************************************************
 void MainWindow::edit_paste ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    int index = m_tab_widget->currentIndex ( );
+
+    if ( index == -1 )
+    {
+        return;
+    }
+
+    m_editors->at ( index )->text_edit ( )->paste ( );
 }
 
 //*****************************************************************************
