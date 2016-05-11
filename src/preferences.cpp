@@ -21,8 +21,6 @@ Preferences::Preferences ( MainWindow* parent )
     // GUI init
     m_layout = new QVBoxLayout (  );
 
-    m_layout_btns = new QHBoxLayout (  );
-
     //*************************************************************************
 
     m_text_wrap_group = new QGroupBox ( "Text wrapping" );
@@ -99,25 +97,23 @@ Preferences::Preferences ( MainWindow* parent )
 
     //*************************************************************************
 
-    m_def_geometry_btn = new QPushButton ( "Default geometry" );
-
-    m_default_btn = new QPushButton ( "Default" );
-
-    m_close_btn = new QPushButton ( "Close" );
-
-    m_layout_btns->addWidget ( m_def_geometry_btn );
-
-    m_layout_btns->addWidget ( m_default_btn );
-
-    m_layout_btns->addWidget ( m_close_btn );
-
-    m_layout->addLayout ( m_layout_btns );
-
     setLayout ( m_layout );
 
     setModal ( true );
 
+    show ( );
+
+    setFixedWidth ( width ( ) + 100 );
+
+    setFixedHeight ( height ( ) );
+
     read_config_file ( );
+
+    connect ( m_text_wrap_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
+    connect ( m_text_wrap_words_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
+    connect ( m_ln_nums_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
+    connect ( m_curr_ln_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
+    connect ( m_tab_width_spinbox, SIGNAL ( valueChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
 }
 
 //*****************************************************************************
@@ -129,13 +125,36 @@ Preferences::~Preferences ( )
 }
 
 //*****************************************************************************
+void Preferences::write_config_file ( )
+{
+    get_widgets_values ( );
+
+    QFile f ( m_config_file_path );
+
+    if ( !f.open ( QFile::WriteOnly | QFile::Text ) )
+    {
+        printf ( "%s: Can't write config file.\n", __FUNCTION__ );
+        return;
+    }
+
+    QTextStream out ( &f );
+
+    for ( int i = 0; i < m_config_keys->size ( ); i++ )
+    {
+        out << m_config_keys->at ( i ) << "=" << m_config_values->at ( i ) << "\n";
+    }
+
+    f.close ( );
+}
+
+//*****************************************************************************
 void Preferences::read_config_file ( )
 {
     QFile f ( m_config_file_path );
 
     if ( !f.open ( QFile::ReadOnly | QFile::Text ) )
     {
-        printf ( "%s: Can't read config file.", __FUNCTION__ );
+        printf ( "%s: Can't read config file.\n", __FUNCTION__ );
         return;
     }
 
@@ -154,12 +173,6 @@ void Preferences::read_config_file ( )
     }
 
     update_widgets ( );
-}
-
-//*****************************************************************************
-void Preferences::write_config_file ( )
-{
-
 }
 
 //*****************************************************************************
@@ -217,6 +230,34 @@ void Preferences::update_widgets ( )
                 break;
             case 7:
                 m_tab_width_spinbox->setValue ( m_config_values->at ( i ).toInt ( ) );
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+//*****************************************************************************
+void Preferences::get_widgets_values ( )
+{
+    for ( int i = 0; i < m_config_values->size ( ); i++ )
+    {
+        switch ( i )
+        {
+            case 0:
+                m_config_values->replace ( i, ( m_text_wrap_chkbox->isChecked ( ) ) ? "1" : "0" );
+                break;
+            case 1:
+                m_config_values->replace ( i, ( m_text_wrap_words_chkbox->isChecked ( ) ) ? "1" : "0" );
+                break;
+            case 2:
+                m_config_values->replace ( i, ( m_ln_nums_chkbox->isChecked ( ) ) ? "1" : "0" );
+                break;
+            case 3:
+                m_config_values->replace ( i, ( m_curr_ln_chkbox->isChecked ( ) ) ? "1" : "0" );
+                break;
+            case 7:
+                m_config_values->replace ( i, ( QString::number ( m_tab_width_spinbox->value ( ) ) ) );
                 break;
             default:
                 break;

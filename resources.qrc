@@ -18,6 +18,5 @@
     <qresource prefix="/files">
         <file>files/help.txt</file>
         <file>files/supported_file_extensions.txt</file>
-        <file>files/config.conf</file>
     </qresource>
 </RCC>

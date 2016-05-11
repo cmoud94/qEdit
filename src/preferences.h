@@ -21,8 +21,11 @@ public:
 
     ~Preferences ( );
 
+private slots:
+    void write_config_file ( );
+
 private:
-    QString m_config_file_path = ":/files/files/config.conf";
+    QString m_config_file_path = "../files/config.conf";
 
     QList< QString >* m_config_keys;
 
@@ -33,8 +36,6 @@ private:
     MainWindow* m_parent;
 
     QVBoxLayout* m_layout;
-
-    QHBoxLayout* m_layout_btns;
 
     QGroupBox* m_text_wrap_group;
 
@@ -58,17 +59,11 @@ private:
 
     QPushButton* m_font_config_btn;
 
-    QPushButton* m_def_geometry_btn;
-
-    QPushButton* m_default_btn;
-
-    QPushButton* m_close_btn;
-
     void read_config_file ( );
 
-    void write_config_file ( );
-
     void update_widgets ( );
+
+    void get_widgets_values ( );
 };
 
 #endif // PREFERENCES_H
