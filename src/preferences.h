@@ -9,6 +9,10 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QList>
+#include <QSettings>
+#include <QFontDialog>
+#include <QFont>
+#include <QDebug>
 
 class MainWindow;
 
@@ -22,16 +26,22 @@ public:
     ~Preferences ( );
 
 private slots:
-    void write_config_file ( );
+    void config_save ( );
+
+    void font_config ( );
 
 private:
-    QString m_config_file_path = "../files/config.conf";
+    QString m_company = "cmoud94";
+
+    QString m_application = "qEdit";
+
+    QSettings* m_settings;
 
     QList< QString >* m_config_keys;
 
-    QList< QString >* m_config_default_values;
+    QList< QVariant >* m_config_default_values;
 
-    QList< QString >* m_config_values;
+    QList< QVariant >* m_config_values;
 
     MainWindow* m_parent;
 
@@ -59,7 +69,7 @@ private:
 
     QPushButton* m_font_config_btn;
 
-    void read_config_file ( );
+    void config_read ( );
 
     void update_widgets ( );
 

@@ -1,5 +1,20 @@
-#include <stdio.h>
-#include <stdlib.h>
+/**
+    qEdit - Lightweight IDE
+    Copyright (C) 2016  Marek Kouřil
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "preferences.h"
 #include "mainwindow.h"
@@ -7,16 +22,18 @@
 //*****************************************************************************
 Preferences::Preferences ( MainWindow* parent )
 {
+    m_settings = new QSettings ( m_company, m_application, this );
+
     m_config_keys = new QList< QString >( { "text_wrap", "text_wrap_whole_words",
                                             "show_line_numbers", "highlight_current_line",
-                                            "font_family", "font_size", "font_weight",
-                                            "tab_width", "geometry" } );
+                                            "font",
+                                            "tab_width" } );
     // TODO: Change to fit Qt!
-    m_config_default_values = new QList< QString >( { "1", "1", "1", "1",
-                                                      "Monospace", "10", "normal",
-                                                      "4", "800x500+0+0" } );
+    m_config_default_values = new QList< QVariant >( { 1, 1, 1, 1,
+                                                       "Ubuntu,10",
+                                                       4 } );
 
-    m_config_values = new QList< QString >( );
+    m_config_values = new QList< QVariant >( );
 
     // GUI init
     m_layout = new QVBoxLayout (  );
@@ -107,13 +124,15 @@ Preferences::Preferences ( MainWindow* parent )
 
     setFixedHeight ( height ( ) );
 
-    read_config_file ( );
+    connect ( m_text_wrap_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( config_save ( ) ) );
+    connect ( m_text_wrap_words_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( config_save ( ) ) );
+    connect ( m_ln_nums_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( config_save ( ) ) );
+    connect ( m_curr_ln_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( config_save ( ) ) );
+    connect ( m_tab_width_spinbox, SIGNAL ( valueChanged ( int ) ), this, SLOT ( config_save ( ) ) );
 
-    connect ( m_text_wrap_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
-    connect ( m_text_wrap_words_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
-    connect ( m_ln_nums_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
-    connect ( m_curr_ln_chkbox, SIGNAL ( stateChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
-    connect ( m_tab_width_spinbox, SIGNAL ( valueChanged ( int ) ), this, SLOT ( write_config_file ( ) ) );
+    connect ( m_font_config_btn, SIGNAL ( clicked ( bool ) ), this, SLOT ( font_config ( ) ) );
+
+    config_read ( );
 }
 
 //*****************************************************************************
@@ -125,52 +144,47 @@ Preferences::~Preferences ( )
 }
 
 //*****************************************************************************
-void Preferences::write_config_file ( )
+void Preferences::config_save ( )
 {
     get_widgets_values ( );
 
-    QFile f ( m_config_file_path );
-
-    if ( !f.open ( QFile::WriteOnly | QFile::Text ) )
-    {
-        printf ( "%s: Can't write config file.\n", __FUNCTION__ );
-        return;
-    }
-
-    QTextStream out ( &f );
+    m_settings->beginGroup ( "General" );
 
     for ( int i = 0; i < m_config_keys->size ( ); i++ )
     {
-        out << m_config_keys->at ( i ) << "=" << m_config_values->at ( i ) << "\n";
+        m_settings->setValue ( m_config_keys->at ( i ), m_config_values->at ( i ) );
     }
 
-    f.close ( );
+    m_settings->endGroup ( );
 }
 
 //*****************************************************************************
-void Preferences::read_config_file ( )
+void Preferences::font_config ( )
 {
-    QFile f ( m_config_file_path );
+    bool ok;
+    QFont font = QFontDialog::getFont ( &ok, this );
 
-    if ( !f.open ( QFile::ReadOnly | QFile::Text ) )
+    if ( ok )
     {
-        printf ( "%s: Can't read config file.\n", __FUNCTION__ );
-        return;
+        m_config_values->insert ( m_config_keys->indexOf ( "font" ), font.toString ( ) );
+        config_save ( );
+        update_widgets ( );
+    }
+}
+
+//*****************************************************************************
+void Preferences::config_read ( )
+{
+    m_config_values->clear ( );
+
+    m_settings->beginGroup ( "General" );
+
+    for ( int i = 0; i < m_config_keys->size ( ); i++ )
+    {
+        m_config_values->append ( m_settings->value ( m_config_keys->at ( i ), m_config_default_values->at ( i ) ).toString ( ) );
     }
 
-    QTextStream in ( &f );
-
-    QString config = in.readAll ( );
-
-    f.close ( );
-
-    QStringList conf_list = config.split ( "\n", QString::SkipEmptyParts );
-
-    for ( int i = 0; i < conf_list.size ( ); i++ )
-    {
-        QStringList conf_line = conf_list.at ( i ).split ( "=" );
-        m_config_values->append ( conf_line.at ( 1 ) );
-    }
+    m_settings->endGroup ( );
 
     update_widgets ( );
 }
@@ -178,89 +192,55 @@ void Preferences::read_config_file ( )
 //*****************************************************************************
 void Preferences::update_widgets ( )
 {
-    for ( int i = 0; i < m_config_values->size ( ); i++ )
-    {
-        switch ( i )
-        {
-            case 0:
-                if ( m_config_values->at ( i ).toInt ( ) == 1 )
-                {
-                    m_text_wrap_chkbox->setCheckState ( Qt::Checked );
-                }
-                else
-                {
-                    m_text_wrap_chkbox->setCheckState ( Qt::Unchecked );
-                }
-                break;
-            case 1:
-                if ( m_config_values->at ( i ).toInt ( ) == 1 )
-                {
-                    m_text_wrap_words_chkbox->setCheckState ( Qt::Checked );
-                }
-                else
-                {
-                    m_text_wrap_words_chkbox->setCheckState ( Qt::Unchecked );
-                }
-                break;
-            case 2:
-                if ( m_config_values->at ( i ).toInt ( ) == 1 )
-                {
-                    m_ln_nums_chkbox->setCheckState ( Qt::Checked );
-                }
-                else
-                {
-                    m_ln_nums_chkbox->setCheckState ( Qt::Unchecked );
-                }
-                break;
-            case 3:
-                if ( m_config_values->at ( i ).toInt ( ) == 1 )
-                {
-                    m_curr_ln_chkbox->setCheckState ( Qt::Checked );
-                }
-                else
-                {
-                    m_curr_ln_chkbox->setCheckState ( Qt::Unchecked );
-                }
-                break;
-            case 4:
-                m_font_config_btn->setText ( m_config_values->at ( i ) );
-                break;
-            case 5:
-                m_font_config_btn->setText ( m_font_config_btn->text ( ) + " | " + m_config_values->at ( i ) );
-                break;
-            case 7:
-                m_tab_width_spinbox->setValue ( m_config_values->at ( i ).toInt ( ) );
-                break;
-            default:
-                break;
-        }
-    }
+    m_settings->beginGroup ( "General" );
+
+    m_text_wrap_chkbox->setChecked (
+            m_settings->value (
+                    m_config_keys->at ( m_config_keys->indexOf ( "text_wrap" ) ), m_config_default_values->at ( 0 )
+                    ).toBool ( )
+            );
+
+    m_text_wrap_words_chkbox->setChecked (
+            m_settings->value (
+                    m_config_keys->at ( m_config_keys->indexOf ( "text_wrap_whole_words" ) ), m_config_default_values->at ( 1 )
+                    ).toBool ( )
+            );
+
+    m_ln_nums_chkbox->setChecked (
+            m_settings->value (
+                    m_config_keys->at ( m_config_keys->indexOf ( "show_line_numbers" ) ), m_config_default_values->at ( 2 )
+                    ).toBool ( )
+            );
+
+    m_curr_ln_chkbox->setChecked (
+            m_settings->value (
+                    m_config_keys->at ( m_config_keys->indexOf ( "highlight_current_line" ) ), m_config_default_values->at ( 3 )
+                    ).toBool ( )
+            );
+
+    m_tab_width_spinbox->setValue (
+            m_settings->value (
+                    m_config_keys->at ( m_config_keys->indexOf ( "tab_width" ) ), m_config_default_values->at ( 5 ) ).toInt ( ) );
+
+    QStringList sl = m_settings->value (
+            m_config_keys->at ( m_config_keys->indexOf ( "font" ) ), m_config_default_values->at ( m_config_keys->indexOf ( "font" ) )
+            ).toString ( ).split ( ",", QString::SkipEmptyParts );
+
+    m_font_config_btn->setText ( sl.at ( 0 ) + " | " + sl.at ( 1 ) );
+
+    m_settings->endGroup ( );
 }
 
 //*****************************************************************************
 void Preferences::get_widgets_values ( )
 {
-    for ( int i = 0; i < m_config_values->size ( ); i++ )
-    {
-        switch ( i )
-        {
-            case 0:
-                m_config_values->replace ( i, ( m_text_wrap_chkbox->isChecked ( ) ) ? "1" : "0" );
-                break;
-            case 1:
-                m_config_values->replace ( i, ( m_text_wrap_words_chkbox->isChecked ( ) ) ? "1" : "0" );
-                break;
-            case 2:
-                m_config_values->replace ( i, ( m_ln_nums_chkbox->isChecked ( ) ) ? "1" : "0" );
-                break;
-            case 3:
-                m_config_values->replace ( i, ( m_curr_ln_chkbox->isChecked ( ) ) ? "1" : "0" );
-                break;
-            case 7:
-                m_config_values->replace ( i, ( QString::number ( m_tab_width_spinbox->value ( ) ) ) );
-                break;
-            default:
-                break;
-        }
-    }
+    m_config_values->replace ( m_config_keys->indexOf ( "text_wrap" ), ( m_text_wrap_chkbox->isChecked ( ) ) ? 1 : 0 );
+
+    m_config_values->replace ( m_config_keys->indexOf ( "text_wrap_whole_words" ), ( m_text_wrap_words_chkbox->isChecked ( ) ) ? 1 : 0 );
+
+    m_config_values->replace ( m_config_keys->indexOf ( "show_line_numbers" ), ( m_ln_nums_chkbox->isChecked ( ) ) ? 1 : 0 );
+
+    m_config_values->replace ( m_config_keys->indexOf ( "highlight_current_line" ), ( m_curr_ln_chkbox->isChecked ( ) ) ? 1 : 0 );
+
+    m_config_values->replace ( m_config_keys->indexOf ( "tab_width" ), ( QString::number ( m_tab_width_spinbox->value ( ) ) ) );
 }
