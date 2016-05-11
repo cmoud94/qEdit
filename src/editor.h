@@ -4,6 +4,9 @@
 #include <QWidget>
 #include <QHBoxLayout>
 #include <QPlainTextEdit>
+#include <QList>
+#include <QVariant>
+#include <QDebug>
 
 class MainWindow;
 
@@ -24,7 +27,13 @@ public:
         SAVED = 2
     };
 
-    Editor ( MainWindow* parent, QString title, QString content, QString path, int document_status );
+    Editor ( MainWindow* parent,
+             QString title,
+             QString content,
+             QString path,
+             int document_status,
+             QList< QVariant >* config,
+             QList< QString >* config_keys );
 
     QWidget* widget ( );
 
@@ -46,12 +55,14 @@ public:
 
     void set_path ( QString new_path );
 
-public slots:
+    void config_set ( QList< QVariant >* new_config );
 
 private slots:
     void document_status_change ( );
 
     void path_change ( QString new_path );
+
+    void config_apply ( );
 
 private:
     MainWindow* m_parent;
@@ -69,6 +80,13 @@ private:
     QHBoxLayout* m_layout;
 
     QPlainTextEdit* m_text_widget;
+
+    QList< QVariant >* m_config;
+
+    QList< QString >* m_config_keys;
+
+signals:
+    void config_changed ( );
 };
 
 #endif // EDITOR_H

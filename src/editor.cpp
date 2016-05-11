@@ -20,13 +20,21 @@
 #include "mainwindow.h"
 
 //*****************************************************************************
-Editor::Editor ( MainWindow *parent, QString title, QString content, QString path, int document_status )
+Editor::Editor ( MainWindow* parent,
+                 QString title,
+                 QString content,
+                 QString path,
+                 int document_status,
+                 QList< QVariant >* config,
+                 QList< QString >* config_keys )
 {
     m_parent = parent;
     m_title = title;
     m_path = path;
     m_document_status = ( document_status_t ) document_status;
     m_default_document_status = ( document_status_t ) document_status;
+    m_config = config;
+    m_config_keys = config_keys;
 
     m_widget = new QWidget ( );
     m_layout = new QHBoxLayout ( m_widget );
@@ -44,6 +52,9 @@ Editor::Editor ( MainWindow *parent, QString title, QString content, QString pat
     connect ( m_text_widget, SIGNAL ( textChanged ( ) ), this, SLOT ( document_status_change ( ) ) );
     connect ( m_text_widget, SIGNAL ( modificationChanged ( bool ) ), this, SLOT ( document_status_change ( ) ) );
     connect ( this, SIGNAL ( path_changed ( QString ) ), this, SLOT ( path_change ( QString ) ) );
+    connect ( this, SIGNAL ( config_changed ( ) ), this, SLOT ( config_apply ( ) ) );
+
+    emit config_changed ( );
 }
 
 //*****************************************************************************
@@ -110,6 +121,18 @@ void Editor::set_path ( QString new_path )
 }
 
 //*****************************************************************************
+void Editor::config_set ( QList< QVariant >* new_config )
+{
+    if ( new_config == NULL )
+    {
+        return;
+    }
+
+    m_config = new_config;
+    emit config_changed ( );
+}
+
+//*****************************************************************************
 void Editor::document_status_change ( )
 {
     if ( m_text_widget->document ( )->isModified ( ) )
@@ -130,4 +153,37 @@ void Editor::path_change ( QString new_path )
 {
     m_title = Editor::title_from_path ( new_path );
     m_parent->tab_widget ( )->setTabText ( m_parent->tab_widget ( )->currentIndex ( ), m_title );
+}
+
+//*****************************************************************************
+void Editor::config_apply ( )
+{
+    // Wrap mode
+    bool wrap_enabled, wrap_words;
+    wrap_enabled = m_config->at ( m_config_keys->indexOf ( "text_wrap" ) ).toBool ( );
+    wrap_words = m_config->at ( m_config_keys->indexOf ( "text_wrap_whole_words" ) ).toBool ( );
+    int wrap_mode = QTextOption::NoWrap;
+
+    if ( wrap_enabled )
+    {
+        if ( wrap_words )
+        {
+            wrap_mode = QTextOption::WordWrap;
+        }
+        else
+        {
+            wrap_mode = QTextOption::WrapAnywhere;
+        }
+    }
+
+    m_text_widget->setWordWrapMode ( ( QTextOption::WrapMode ) wrap_mode );
+
+    // Tab width
+    m_text_widget->setTabStopWidth ( m_config->at ( m_config_keys->indexOf ( "tab_width" ) ).toInt ( ) );
+
+    // Font
+    QString font_str = m_config->at ( m_config_keys->indexOf ( "font" ) ).toString ( );
+    QFont font;
+    font.fromString ( font_str );
+    m_text_widget->setFont ( font );
 }

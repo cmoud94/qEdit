@@ -40,6 +40,18 @@ MainWindow::MainWindow ( QMainWindow* parent )
     tab_widget_init ( );
 //	status_bar_init ( );
 
+    Preferences* p = new Preferences ( this );
+    p->get_config ( &m_config_keys, &m_config );
+    delete p;
+
+    QSettings settings ( "cmoud94", "qEdit" );
+
+    settings.beginGroup ( "Window" );
+
+    setGeometry ( settings.value ( "geometry", QVariant ( QRect ( 10, 10, WIN_MIN_WIDTH, WIN_MIN_HEIGHT ) ) ).toRect ( ) );
+
+    settings.endGroup ( );
+
     setFocus ( );
 }
 
@@ -54,6 +66,12 @@ MainWindow::~MainWindow ( )
 QTabWidget* MainWindow::tab_widget ( )
 {
     return m_tab_widget;
+}
+
+//*****************************************************************************
+QList< Editor* >* MainWindow::editors ( )
+{
+    return m_editors;
 }
 
 //*****************************************************************************
@@ -241,6 +259,14 @@ void MainWindow::file_quit ( )
         file_close ( );
     }
 
+    QSettings settings ( "cmoud94", "qEdit" );
+
+    settings.beginGroup ( "Window" );
+
+    settings.setValue ( "geometry", QVariant ( geometry ( ) ) );
+
+    settings.endGroup ( );
+
     close ( );
 }
 
@@ -312,8 +338,17 @@ void MainWindow::edit_paste ( )
 //*****************************************************************************
 void MainWindow::edit_preferences ( )
 {
-    Preferences p ( this );
-    p.exec ( );
+    Preferences* p = new Preferences ( this );
+
+    connect ( p,
+              SIGNAL ( config_changed ( QList< QVariant >* ) ),
+              this,
+              SLOT ( config_changed ( QList< QVariant >* ) )
+              );
+
+    p->exec ( );
+
+    delete p;
 }
 
 //*****************************************************************************
@@ -357,6 +392,22 @@ void MainWindow::tab_changed ( int index )
     }
 
     window_title_update ( m_tab_widget->tabText ( index ) );
+}
+
+//*****************************************************************************
+void MainWindow::config_changed ( QList< QVariant >* new_config )
+{
+    m_config = * new_config;
+
+    if ( m_editors == NULL )
+    {
+        return;
+    }
+
+    for ( int i = 0; i < m_editors->size ( ); i++ )
+    {
+        m_editors->at ( i )->config_set ( new_config );
+    }
 }
 
 //*****************************************************************************
@@ -526,7 +577,7 @@ void MainWindow::status_bar_init ( )
 //*****************************************************************************
 void MainWindow::tab_new ( QString title, QString content, QString path, int document_status )
 {
-    Editor* editor = new Editor ( this, title, content, path, document_status );
+    Editor* editor = new Editor ( this, title, content, path, document_status, &m_config, &m_config_keys );
     m_editors->append ( editor );
     int r = m_tab_widget->addTab ( editor->widget ( ), QIcon ( ":/icons/document-new-7.png" ), title );
     m_tab_widget->setCurrentIndex ( r );
@@ -575,7 +626,7 @@ void MainWindow::load_supported_file_types ( )
 }
 
 //*****************************************************************************
-void MainWindow::file_write ( QString path, Editor *editor )
+void MainWindow::file_write ( QString path, Editor* editor )
 {
     QFile f ( path );
 
@@ -594,4 +645,10 @@ void MainWindow::file_write ( QString path, Editor *editor )
     f.close ( );
 
     editor->set_document_status ( Editor::document_status_t::SAVED );
+}
+
+void MainWindow::closeEvent ( QCloseEvent* event )
+{
+    file_quit ( );
+    event->accept ( );
 }

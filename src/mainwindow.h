@@ -12,6 +12,8 @@
 #include <QMessageBox>
 #include <QToolButton>
 #include <QFileDialog>
+#include <QVariant>
+#include <QSettings>
 #include <QDebug>
 
 class Editor;
@@ -26,6 +28,8 @@ public:
     ~MainWindow ( );
 
     QTabWidget* tab_widget ( );
+
+    QList< Editor* >* editors ( );
 
 public slots:
     void window_title_update ( QString new_title );
@@ -69,6 +73,8 @@ private slots:
 
     void tab_changed ( int index );
 
+    void config_changed ( QList< QVariant >* new_config );
+
 private:
     const QString WIN_TITLE = "qEdit";
 
@@ -102,6 +108,10 @@ private:
 
     QString m_default_file_type;
 
+    QList< QVariant > m_config;
+
+    QList< QString > m_config_keys;
+
     void menu_bar_init ( );
 
     void tool_bar_init ( );
@@ -117,6 +127,8 @@ private:
     void load_supported_file_types ( );
 
     void file_write ( QString path, Editor* editor );
+
+    void closeEvent ( QCloseEvent* event );
 };
 
 #endif // MAINWINDOW_H

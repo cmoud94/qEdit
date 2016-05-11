@@ -25,10 +25,14 @@ public:
 
     ~Preferences ( );
 
+    void get_config (QList<QString> *config_keys, QList<QVariant> *config_values );
+
 private slots:
     void config_save ( );
 
     void font_config ( );
+
+    void text_wrap_toggled ( bool val );
 
 private:
     QString m_company = "cmoud94";
@@ -74,6 +78,9 @@ private:
     void update_widgets ( );
 
     void get_widgets_values ( );
+
+signals:
+    void config_changed ( QList< QVariant >* new_config );
 };
 
 #endif // PREFERENCES_H
