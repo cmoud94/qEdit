@@ -16,12 +16,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "mainwindow.h"
 #include "editor.h"
 #include "preferences.h"
+#include "help.h"
 
 //*****************************************************************************
 MainWindow::MainWindow ( QMainWindow* parent )
@@ -136,7 +134,7 @@ void MainWindow::file_open ( )
     {
         dialog_show ( "Can't open file.",
                       "Can't open file [" + path + "].",
-                      QMessageBox::Warning,
+                      QMessageBox::Critical,
                       QMessageBox::Ok,
                       QMessageBox::Ok );
         return;
@@ -356,25 +354,30 @@ void MainWindow::edit_preferences ( )
 //*****************************************************************************
 void MainWindow::search_find ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+
 }
 
 //*****************************************************************************
 void MainWindow::search_replace ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+
 }
 
 //*****************************************************************************
 void MainWindow::help ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    Help h ( this );
+    h.exec ( );
 }
 
 //*****************************************************************************
 void MainWindow::help_about ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+    dialog_show ( "qEdit Lightweight IDE\nCreator: Marek Kouřil (KOU0120)",
+                  "URO 2016",
+                  QMessageBox::Information,
+                  QMessageBox::Ok,
+                  QMessageBox::Ok );
 }
 
 //*****************************************************************************
@@ -578,7 +581,7 @@ void MainWindow::tab_widget_init ( )
 //*****************************************************************************
 void MainWindow::status_bar_init ( )
 {
-    printf ( "%s\n", __FUNCTION__ );
+
 }
 
 //*****************************************************************************
@@ -617,7 +620,11 @@ void MainWindow::load_supported_file_types ( )
 
     if ( !f.open ( QFile::ReadOnly | QFile::Text ) )
     {
-        printf ( "%s: Can't load supported file types.\n", __FUNCTION__ );
+        dialog_show ( "File save",
+                      "Can't load supported file types.",
+                      QMessageBox::Critical,
+                      QMessageBox::Ok,
+                      QMessageBox::Ok );
         return;
     }
 
@@ -644,7 +651,11 @@ void MainWindow::file_write ( QString path, Editor* editor )
 
     if ( !f.open ( QFile::WriteOnly | QFile::Text ) )
     {
-        printf ( "Can't open file for saving.\n" );
+        dialog_show ( "Can't save file.",
+                      "Can't save file [" + path + "].",
+                      QMessageBox::Critical,
+                      QMessageBox::Ok,
+                      QMessageBox::Ok );
         return;
     }
 

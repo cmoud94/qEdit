@@ -17,13 +17,16 @@ CONFIG += c++11
 SOURCES += src/main.cpp \
 	src/mainwindow.cpp \
     src/editor.cpp \
-    src/preferences.cpp
+    src/preferences.cpp \
+    src/help.cpp
 
 HEADERS  += \
 	src/mainwindow.h \
     editor.h \
     src/editor.h \
-    src/preferences.h
+    src/preferences.h \
+    help.h \
+    src/help.h
 
 RESOURCES += \
 	resources.qrc

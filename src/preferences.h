@@ -25,7 +25,7 @@ public:
 
     ~Preferences ( );
 
-    void get_config (QList<QString> *config_keys, QList<QVariant> *config_values );
+    void get_config ( QList< QString >* config_keys, QList< QVariant >* config_values );
 
 private slots:
     void config_save ( );
