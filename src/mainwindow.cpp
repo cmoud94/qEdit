@@ -20,6 +20,7 @@
 #include "editor.h"
 #include "preferences.h"
 #include "help.h"
+#include "find.h"
 
 //*****************************************************************************
 MainWindow::MainWindow ( QMainWindow* parent )
@@ -354,13 +355,15 @@ void MainWindow::edit_preferences ( )
 //*****************************************************************************
 void MainWindow::search_find ( )
 {
-
+    Find f ( this, false );
+    f.exec ( );
 }
 
 //*****************************************************************************
 void MainWindow::search_replace ( )
 {
-
+    Find f ( this, true );
+    f.exec ( );
 }
 
 //*****************************************************************************

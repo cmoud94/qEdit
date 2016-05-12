@@ -19,6 +19,7 @@
 #include "help.h"
 #include "mainwindow.h"
 
+//*****************************************************************************
 Help::Help ( MainWindow* parent )
 {
     QHBoxLayout* layout = new QHBoxLayout ( );

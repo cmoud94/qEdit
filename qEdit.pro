@@ -18,7 +18,8 @@ SOURCES += src/main.cpp \
 	src/mainwindow.cpp \
     src/editor.cpp \
     src/preferences.cpp \
-    src/help.cpp
+    src/help.cpp \
+    src/find.cpp
 
 HEADERS  += \
 	src/mainwindow.h \
@@ -26,7 +27,8 @@ HEADERS  += \
     src/editor.h \
     src/preferences.h \
     help.h \
-    src/help.h
+    src/help.h \
+    src/find.h
 
 RESOURCES += \
 	resources.qrc
