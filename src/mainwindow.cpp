@@ -53,6 +53,8 @@ MainWindow::MainWindow ( QMainWindow* parent )
     settings.endGroup ( );
 
     setFocus ( );
+
+    toggle_actions_enabled ( false );
 }
 
 //*****************************************************************************
@@ -380,6 +382,11 @@ void MainWindow::tab_close ( int index )
 {
     m_tab_widget->removeTab ( index );
     m_editors->removeAt ( index );
+
+    if ( m_tab_widget->currentIndex ( ) == -1 )
+    {
+        toggle_actions_enabled ( false );
+    }
 }
 
 //*****************************************************************************
@@ -577,6 +584,11 @@ void MainWindow::status_bar_init ( )
 //*****************************************************************************
 void MainWindow::tab_new ( QString title, QString content, QString path, int document_status )
 {
+    if ( m_tab_widget->currentIndex ( ) == -1 )
+    {
+        toggle_actions_enabled ( true );
+    }
+
     Editor* editor = new Editor ( this, title, content, path, document_status, &m_config, &m_config_keys );
     m_editors->append ( editor );
     int r = m_tab_widget->addTab ( editor->widget ( ), QIcon ( ":/icons/document-new-7.png" ), title );
@@ -651,4 +663,40 @@ void MainWindow::closeEvent ( QCloseEvent* event )
 {
     file_quit ( );
     event->accept ( );
+}
+
+//*****************************************************************************
+void MainWindow::toggle_actions_enabled ( bool val )
+{
+    // Tool bar actions
+    QList< QAction* > actions = m_tool_bar->actions ( );
+
+    for ( int i = 2; i < actions.size ( ); i++ )
+    {
+        actions.at ( i )->setEnabled ( val );
+    }
+
+    // File menu
+    actions = m_menu_file->actions ( );
+
+    for ( int i = 2; i < actions.size ( ) - 1; i++ )
+    {
+        actions.at ( i )->setEnabled ( val );
+    }
+
+    // Edit menu
+    actions = m_menu_edit->actions ( );
+
+    for ( int i = 0; i < actions.size ( ) - 1; i++ )
+    {
+        actions.at ( i )->setEnabled ( val );
+    }
+
+    // Search menu
+    actions = m_menu_search->actions ( );
+
+    for ( int i = 0; i < actions.size ( ); i++ )
+    {
+        actions.at ( i )->setEnabled ( val );
+    }
 }

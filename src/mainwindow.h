@@ -129,6 +129,8 @@ private:
     void file_write ( QString path, Editor* editor );
 
     void closeEvent ( QCloseEvent* event );
+
+    void toggle_actions_enabled ( bool val );
 };
 
 #endif // MAINWINDOW_H
